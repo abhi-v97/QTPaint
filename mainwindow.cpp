@@ -16,6 +16,91 @@ MainWindow::MainWindow(QWidget *parent)
     resize(500, 500);
 }
 
+void MainWindow::closeEvent(QCloseEvent *event){
+    if(maybeSave()){
+        event->accept();
+    } else {
+        event->ignore();
+    }
+}
+
+void MainWindow::open(){
+    if(maybeSave()){
+        QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), QDir::currentPath());
+        if(!fileName.isEmpty()){
+            scribbleArea->openImage(fileName);
+        }
+
+    }
+}
+
+void MainWindow::save(){
+    QAction *action = qobject_cast<QAction *>(sender());
+    QByteArray fileFormat = action->data().toByteArray();
+    saveFile(fileFormat);
+}
+
+void MainWindow::penColour(){
+    QColor newCol = QColorDialog::getColor(scribbleArea->penColour());
+    if(newCol.isValid()){
+        scribbleArea->setPenColour(newCol);
+    }
+}
+
+void MainWindow::penWidth(){
+    bool ok;
+    int newWidth = QInputDialog::getInt(this, tr("Paint"),
+                                        tr("Select Pen Width: "),
+                                        scribbleArea->penWidth(), 1, 50, 1, &ok);
+
+    if(ok){
+        scribbleArea->setPenWidth(newWidth);
+    }
+}
+
+void MainWindow::about(){
+    QMessageBox::about(this, tr("About Paint"), tr("Sample Paint App"));
+}
+
+void MainWindow::createActions(){
+    openAct = new QAction(tr("&Open"), this);
+    openAct->setShortcuts(QKeySequence::Open);
+    connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
+
+    foreach(QByteArray format, QImageWriter::supportedImageFormats()){
+        QString text = tr("%1...").arg(QString(format).toUpper());
+        QAction *action = new QAction(text, this);
+        action->setData(format);
+        connect(action, SIGNAL(triggered()), this, SLOT(save()));
+        saveAsActs.append(action);
+    }
+    printAct = new QAction(tr("&Print..."));
+    connect(printAct, SIGNAL(triggered()), scribbleArea, SLOT(print()));
+
+    exitAct = new QAction(tr("E&xit"), this);
+    exitAct->setShortcuts(QKeySequence::Quit);
+    connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
+
+    penColourAct = new QAction(tr("&Pen Colour..."), this);
+    connect(penColourAct, SIGNAL(triggered()), this, SLOT(penColour()));
+
+    penWidthAct = new QAction(tr("Pen &Width..."), this);
+    connect(penWidthAct, SIGNAL(triggered()), this, SLOT(penWidth()));
+
+    clearAct = new QAction(tr("&Clear Screen"), this);
+    clearAct->setShortcut(tr("Ctrl+L"));
+    connect(clearAct, SIGNAL(triggered()),
+            scribbleArea, SLOT(clearImage()));
+
+    aboutAct = new QAction(tr("&About"), this);
+    connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
+
+    // Create about Qt action and tie to MainWindow::aboutQt()
+    aboutQTAct = new QAction(tr("About &Qt..."), this);
+    connect(aboutQTAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
+
+}
+
 
 void MainWindow::createMenus(){
     saveAsMenu = new QMenu(tr("&Save As"), this);
