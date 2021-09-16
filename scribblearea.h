@@ -23,6 +23,7 @@ public:
 
 
 public slots:
+// events
     void clearImage();
     void print();
 
@@ -42,8 +43,11 @@ private:
     bool scribbling;
     int myPenWidth;
 
+    // Store variables like pen colour and drawn image
     QColor myPenColour;
     QImage image;
+
+    // location of current mouse event
     QPoint lastPoint;
 };
 

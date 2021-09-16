@@ -8,14 +8,20 @@
 MainWindow::MainWindow(QWidget *parent)
 
 {
+    // create and set the central widget
     scribbleArea = new ScribbleArea;
     setCentralWidget(scribbleArea);
     createActions();
     createMenus();
+
+    // app title
     setWindowTitle(tr("Paint"));
+
+    // app size
     resize(500, 500);
 }
 
+// close app event
 void MainWindow::closeEvent(QCloseEvent *event){
     if(maybeSave()){
         event->accept();
@@ -24,9 +30,14 @@ void MainWindow::closeEvent(QCloseEvent *event){
     }
 }
 
+// Check if image has changed, then try to open a file
 void MainWindow::open(){
+
+    // maybeSave returns true if no changes were made
     if(maybeSave()){
         QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), QDir::currentPath());
+        
+        // If a file exists, load it in scribbleArea
         if(!fileName.isEmpty()){
             scribbleArea->openImage(fileName);
         }
@@ -34,12 +45,16 @@ void MainWindow::open(){
     }
 }
 
+
+// Called when Save As is clicked
 void MainWindow::save(){
     QAction *action = qobject_cast<QAction *>(sender());
     QByteArray fileFormat = action->data().toByteArray();
     saveFile(fileFormat);
 }
 
+
+// Open the colour wheel to choose pen colour
 void MainWindow::penColour(){
     QColor newCol = QColorDialog::getColor(scribbleArea->penColour());
     if(newCol.isValid()){
@@ -47,6 +62,7 @@ void MainWindow::penColour(){
     }
 }
 
+// modify pen width
 void MainWindow::penWidth(){
     bool ok;
     int newWidth = QInputDialog::getInt(this, tr("Paint"),
@@ -58,15 +74,23 @@ void MainWindow::penWidth(){
     }
 }
 
+
+// About QT dialog
 void MainWindow::about(){
     QMessageBox::about(this, tr("About Paint"), tr("Sample Paint App"));
 }
 
+
+// Menu actions which call functions
 void MainWindow::createActions(){
     openAct = new QAction(tr("&Open"), this);
     openAct->setShortcuts(QKeySequence::Open);
     connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
 
+
+    // gets list of supported image formats
+    // creates an action for each file format
+    // each option is added to the Save As function
     foreach(QByteArray format, QImageWriter::supportedImageFormats()){
         QString text = tr("%1...").arg(QString(format).toUpper());
         QAction *action = new QAction(text, this);
@@ -87,6 +111,7 @@ void MainWindow::createActions(){
     penWidthAct = new QAction(tr("Pen &Width..."), this);
     connect(penWidthAct, SIGNAL(triggered()), this, SLOT(penWidth()));
 
+    // Action which clears the screen
     clearAct = new QAction(tr("&Clear Screen"), this);
     clearAct->setShortcut(tr("Ctrl+L"));
     connect(clearAct, SIGNAL(triggered()),
@@ -101,7 +126,7 @@ void MainWindow::createActions(){
 
 }
 
-
+// Handles the menu bar
 void MainWindow::createMenus(){
     saveAsMenu = new QMenu(tr("&Save As"), this);
     foreach(QAction *action, saveAsActs)
@@ -129,6 +154,8 @@ void MainWindow::createMenus(){
 }
 
 bool MainWindow::maybeSave(){
+
+    // check for changes 
     if(scribbleArea->isModified()){
         QMessageBox::StandardButton ret;
         ret = QMessageBox::warning(this, tr("Scribble"),

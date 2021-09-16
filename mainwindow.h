@@ -7,11 +7,13 @@
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
-
+// drawing board where the magic happens
 class ScribbleArea;
 
 class MainWindow : public QMainWindow
 {
+    // Declares class to be a QTobject
+    // handles events
     Q_OBJECT
 
 public:
@@ -21,6 +23,7 @@ public:
 protected:
     void closeEvent(QCloseEvent *event) override;
 
+// events that can be triggered
 private slots:
     void open();
     void save();
@@ -29,6 +32,7 @@ private slots:
     void about();
 
 private:
+// actions and functions used by the program
     Ui::MainWindow *ui;
     void createActions();
     void createMenus();

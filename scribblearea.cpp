@@ -11,13 +11,19 @@
 
 ScribbleArea::ScribbleArea(QWidget *parent) : QWidget(parent){
 
+
+    // places widgets in the top left
     setAttribute(Qt::WA_StaticContents);
+
+    // default values for variables
     modified = false;
     scribbling = false;
     myPenWidth = 1;
     myPenColour = Qt::blue;
 }
 
+
+// load existing image into ScribbleArea
 bool ScribbleArea::openImage(const QString &fileName){
     QImage loadedImage;
     if(!loadedImage.load(fileName)){
@@ -31,6 +37,8 @@ bool ScribbleArea::openImage(const QString &fileName){
     return true;
 }
 
+
+// Save image function
 bool ScribbleArea::saveImage(const QString &fileName, const char *fileFormat){
     QImage visibleImage = image;
     resizeImage(&visibleImage, size());
@@ -56,6 +64,8 @@ void ScribbleArea::clearImage(){
     update();
 }
 
+
+// Triggers if mouse button is left click
 void ScribbleArea::mousePressEvent(QMouseEvent *event){
     if(event->button() == Qt::LeftButton){
         lastPoint = event->pos();
@@ -63,11 +73,15 @@ void ScribbleArea::mousePressEvent(QMouseEvent *event){
     }
 }
 
+
+// for as long as scribbling = true, draw where the mouse pointer is
 void ScribbleArea::mouseMoveEvent(QMouseEvent *event){
     if((event->buttons() & Qt::LeftButton) && scribbling)
         drawLineTo(event->pos());
 }
 
+
+// when left click is released, stop drawing
 void ScribbleArea::mouseReleaseEvent(QMouseEvent *event){
     if(event->button() == Qt::LeftButton && scribbling) {
         drawLineTo(event->pos());
@@ -92,6 +106,7 @@ void ScribbleArea::resizeEvent(QResizeEvent *event){
     QWidget::resizeEvent(event);
 }
 
+// used to draw on the widgets
 void ScribbleArea::drawLineTo(const QPoint &endPoint){
 
     QPainter painter(&image);
@@ -105,6 +120,8 @@ void ScribbleArea::drawLineTo(const QPoint &endPoint){
     lastPoint = endPoint;
 }
 
+
+// triggers when app is resized
 void ScribbleArea::resizeImage(QImage *image, const QSize &newSize){
 
     if(image->size() == newSize)
@@ -119,7 +136,7 @@ void ScribbleArea::resizeImage(QImage *image, const QSize &newSize){
     *image = newImage;
 }
 
-
+// print the image
 void ScribbleArea::print()
 {
     // Check for print dialog availability
